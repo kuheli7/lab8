@@ -1,0 +1,15 @@
+{
+  "name": "gym-management-system",
+  "version": "1.0.0",
+  "description": "Full-stack web application using Node.js, Express.js, REST API, HTML5, and Tailwind CSS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["nodejs", "express", "rest-api", "html5", "tailwind", "crud", "gym-management"],
+  "author": "Student",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
