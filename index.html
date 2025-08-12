@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Management System - Full-stack Web Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-4 min-h-screen">
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-100">Gym Management System</h1>
+    
+    <div class="text-center mb-4 space-x-2">
+        <button onclick="loadMembers()" class="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded">Load Members</button>
+        <button onclick="showForm()" class="bg-gray-500 hover:bg-gray-400 hover:text-black text-white px-4 py-2 rounded">Add Member</button>
+        <button onclick="clearList()" class="bg-gray-400 hover:bg-white text-black px-4 py-2 rounded">Clear</button>
+    </div>
+
+    <div id="form" class="bg-slate-800 border border-slate-600 p-4 rounded mb-4 hidden">
+        <h3 class="font-bold mb-3 text-gray-300">Add New Member</h3>
+        <input type="text" id="name" placeholder="Name" class="bg-black border border-slate-600 text-white p-2 rounded mr-2 mb-2 placeholder-gray-400">
+        <input type="number" id="age" placeholder="Age" class="bg-black border border-slate-600 text-white p-2 rounded mr-2 mb-2 placeholder-gray-400">
+        <input type="email" id="email" placeholder="Email" class="bg-black border border-slate-600 text-white p-2 rounded mr-2 mb-2 placeholder-gray-400">
+        <select id="plan" class="bg-black border border-slate-600 text-white p-2 rounded mr-2 mb-2">
+            <option value="">Select Plan</option>
+            <option value="BRONZE">Bronze - ₹1800</option>
+            <option value="SILVER">Silver - ₹3000</option>
+            <option value="GOLD">Gold - ₹4500</option>
+            <option value="PLATINUM">Platinum - ₹8000</option>
+        </select><br>
+        <button onclick="addMember()" class="bg-gray-500 hover:bg-gray-400 hover:text-black text-white px-4 py-2 rounded mr-2">Save</button>
+        <button onclick="hideForm()" class="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded">Cancel</button>
+    </div>
+
+    <div id="membersList" class="bg-slate-800 border border-slate-600 p-4 rounded">
+        <p class="text-gray-400 text-center">Click "Load Members" to see all members</p>
+    </div>
+
+    <script>
+        async function loadMembers() {
+            const res = await fetch('/api/members');
+            const data = await res.json();
+            if (data.success) showMembers(data.data); else alert('Error loading members');
+        }
+
+        function showMembers(members) {
+            let html = '<table class="w-full bg-slate-800 border-collapse"><tr class="bg-gray-500"><th class="p-2 text-white border border-gray-700">ID</th><th class="p-2 text-white border border-gray-700">Name</th><th class="p-2 text-white border border-gray-700">Age</th><th class="p-2 text-white border border-gray-700">Plan</th><th class="p-2 text-white border border-gray-700">Action</th></tr>';
+            members.forEach(m => html += `<tr class="hover:bg-gray-600"><td class="p-2 border border-gray-700">${m.id}</td><td class="p-2 text-gray-300 border border-gray-700">${m.name}</td><td class="p-2 border border-gray-700">${m.age}</td><td class="p-2 text-gray-400 border border-gray-700">${m.subscription.plan}</td><td class="p-2 border border-gray-700"><button onclick="deleteMember(${m.id})" class="bg-gray-400 hover:bg-white text-black px-2 py-1 rounded text-sm">Delete</button></td></tr>`);
+            document.getElementById('membersList').innerHTML = html + '</table>';
+        }
+
+        function showForm() { document.getElementById('form').classList.remove('hidden'); }
+        
+        function hideForm() {
+            document.getElementById('form').classList.add('hidden');
+            document.getElementById('name').value = document.getElementById('age').value = document.getElementById('email').value = document.getElementById('plan').value = '';
+        }
+
+        async function addMember() {
+            const prices = {'BRONZE': 1800, 'SILVER': 3000, 'GOLD': 4500, 'PLATINUM': 8000};
+            const plan = document.getElementById('plan').value, today = new Date().toISOString().split('T')[0];
+            const member = {
+                name: document.getElementById('name').value, age: +document.getElementById('age').value, gender: 'M',
+                email: document.getElementById('email').value, phone: '+91-9876543210', join_date: today,
+                subscription: { plan, start_date: today, end_date: today, price: prices[plan], status: 'Active' },
+                fitness_goal: 'General Fitness', sessions: []
+            };
+            const res = await fetch('/api/members', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(member) });
+            const result = await res.json();
+            if (result.success) { alert('Member added!'); hideForm(); loadMembers(); } else alert('Error adding member');
+        }
+
+        async function deleteMember(id) {
+            if (confirm('Delete this member?')) {
+                const res = await fetch(`/api/members/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) { alert('Member deleted!'); loadMembers(); } else alert('Error deleting member');
+            }
+        }
+
+        function clearList() { document.getElementById('membersList').innerHTML = '<p class="text-gray-400 text-center">Click "Load Members" to see all members</p>'; }
+    </script>
+</body>
+</html>
