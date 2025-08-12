@@ -1,8 +1,6 @@
 const express = require('express');
 const fs = require('fs');
-con// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🏋️ Server running on port ${PORT}`)); app = express();
+const app = express();
 
 // Setup
 app.use(express.json());
@@ -68,4 +66,5 @@ app.delete('/api/members/:id', (req, res) => {
 });
 
 // Start server
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🏋️ Server running on port ${PORT}`));
